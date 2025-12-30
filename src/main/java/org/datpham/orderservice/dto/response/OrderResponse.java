@@ -10,4 +10,8 @@ public class OrderResponse {
     private String status;
     private Long totalAmount;
     private List<OrderItemResponse> orderItems;
+    private String createdBy;
+    private String updatedBy;
+    private String createdDate;
+    private String updatedDate;
 }

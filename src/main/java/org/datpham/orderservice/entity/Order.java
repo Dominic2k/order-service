@@ -1,6 +1,9 @@
 package org.datpham.orderservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,8 +19,13 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @NotEmpty
     private String customerId;
+
+    @NotEmpty
     private String status;
+
+    @NotNull
     private Long totalAmount;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)

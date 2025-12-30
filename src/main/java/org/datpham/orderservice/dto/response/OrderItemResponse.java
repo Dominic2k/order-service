@@ -9,4 +9,8 @@ public class OrderItemResponse {
     private String productId;
     private BigDecimal price;
     private Integer quantity;
+    private String createdBy;
+    private String updatedBy;
+    private String createdDate;
+    private String updatedDate;
 }

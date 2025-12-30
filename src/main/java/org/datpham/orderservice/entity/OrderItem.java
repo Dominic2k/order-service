@@ -1,6 +1,8 @@
 package org.datpham.orderservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +22,12 @@ public class OrderItem extends BaseEntity {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @NotEmpty
     private String productId;
+
+    @NotNull
     private BigDecimal price;
+
+    @NotNull
     private Integer quantity;
 }
