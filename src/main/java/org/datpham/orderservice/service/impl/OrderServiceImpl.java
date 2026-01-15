@@ -20,6 +20,7 @@ import org.datpham.orderservice.mapper.OrderMapper;
 import org.datpham.orderservice.repository.OrderItemRepository;
 import org.datpham.orderservice.repository.OrderRepository;
 import org.datpham.orderservice.service.OrderService;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,66 +41,7 @@ public class OrderServiceImpl implements OrderService {
     OrderMapper orderMapper;
     ProductClient productClient;
     OrderItemRepository orderItemRepository;
-
-//    @Override
-//    @Transactional
-//    public OrderResponse createOrder(CreateOrderRequest request) {
-//        List<String> productIds = request.getOrderItems().stream()
-//                .map(OrderItemRequest::getProductId).distinct().collect(Collectors.toList());
-//
-//        List<ProductDTO> products = productClient.getProductsByIds(new ProductFilter(productIds));
-//
-//        //log.info("Products returned from Product Service: {}", products);
-//
-//        Map<String, ProductDTO> productMap = new HashMap<>();
-//        for (ProductDTO productDTO : products) {
-//            if (productDTO.getId() == null) {
-//                log.error("ProductDTO has NULL ID! Check mapping fields. Product data: {}", productDTO);
-//            }
-//            productMap.put(productDTO.getId(), productDTO);
-//        }
-//
-//        Order order = new Order();
-//        order.setCustomerId(request.getCustomerId());
-//
-//
-//        order.setStatus(OrderStatus.NEW.name());
-//        order.setTotalAmount(0L); // Initialize with Long value
-//        Order savedOrder = orderRepository.save(order);
-//
-//        long totalAmount = 0;
-//        List<OrderItem> orderItems = new ArrayList<>();
-//
-//        for (OrderItemRequest orderItemRequest : request.getOrderItems()) {
-//            ProductDTO productDTO = productMap.get(orderItemRequest.getProductId());
-//
-//            if (productDTO == null) {
-//                throw new RuntimeException("Cannot find product with id: " + orderItemRequest.getProductId());
-//            }
-//
-//            //log.info("Stock: " + productDTO.getStock() + ", Quantity: " + orderItemRequest.getQuantity());
-//
-//            if (orderItemRequest.getQuantity() > productDTO.getStock()) {
-//                throw new RuntimeException("Product " + productDTO.getName() + " is out of stock.");
-//            }
-//
-//            long price = productDTO.getPrice();
-//            OrderItem item = new OrderItem();
-//            item.setOrder(savedOrder);
-//            item.setProductId(orderItemRequest.getProductId());
-//            item.setPrice(BigDecimal.valueOf(price));
-//            item.setQuantity(orderItemRequest.getQuantity());
-//
-//            orderItems.add(item);
-//            totalAmount += price * orderItemRequest.getQuantity();
-//        }
-//
-//        orderItemRepository.saveAll(orderItems);
-//        savedOrder.setTotalAmount(totalAmount);
-//        Order finalOrder = orderRepository.save(savedOrder);
-//
-//        return orderMapper.toOrderResponse(finalOrder);
-//    }
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     @Transactional()
@@ -163,7 +105,10 @@ public class OrderServiceImpl implements OrderService {
         savedOrder.setTotalAmount(totalAmount);
         Order finalOrder = orderRepository.save(savedOrder);
 
-        // --- BƯỚC 5: Gọi Product Service để trừ kho (Distributed Transaction Logic) ---
+
+        kafkaTemplate.send("order_created", finalOrder);
+        log.info("Order created successfully: {}", finalOrder.getId());
+
         LockProductReq lockReq = new LockProductReq();
         lockReq.setItems(lockItems);
 

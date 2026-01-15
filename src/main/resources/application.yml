@@ -1,0 +1,17 @@
+spring:
+    datasource:
+        url: jdbc:mysql://localhost:3306/db_orders
+        username: root
+        password:
+    jpa:
+        show-sql: true
+        hibernate:
+            ddl-auto: update
+    kafka:
+        bootstrap-servers: localhost:9092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+    port: 8081
